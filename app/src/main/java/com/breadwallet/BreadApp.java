@@ -18,28 +18,24 @@ import com.breadwallet.tools.manager.AnalyticsManager;
 import com.breadwallet.tools.util.BRConstants;
 import com.breadwallet.tools.util.LocaleHelper;
 import com.breadwallet.tools.util.Utils;
+import com.breadwallet.lnd.LndManager;
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.pusher.pushnotifications.PushNotifications;
 
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.CoroutineScopeKt;
+import kotlinx.coroutines.CoroutineStart;
+import kotlinx.coroutines.future.FutureKt;
 import timber.log.Timber;
 
 public class BreadApp extends Application {
@@ -51,6 +47,7 @@ public class BreadApp extends Application {
     public static AtomicInteger activityCounter = new AtomicInteger();
     public static long backgroundedTime;
     private static Activity currentActivity;
+    public static LndManager lnd;
 
     @Override
     public void onCreate() {
@@ -79,6 +76,13 @@ public class BreadApp extends Application {
         display.getSize(size);
         DISPLAY_HEIGHT_PX = size.y;
         mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+
+        lnd = new LndManager(getApplicationInfo().dataDir);
+        FutureKt.future(
+            CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
+            EmptyCoroutineContext.INSTANCE,
+            CoroutineStart.DEFAULT,
+            (scope, continuation) -> lnd.start(continuation));
     }
 
 
@@ -139,7 +143,7 @@ public class BreadApp extends Application {
             public void run() {
                 try {
                     AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(app);
-                    finished(adInfo);
+                    //finished(adInfo);
                 } catch (IllegalStateException e) {
                     e.printStackTrace();
                 } catch (GooglePlayServicesRepairableException e) {

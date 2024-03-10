@@ -1,3 +1,7 @@
+plugins {
+    id "com.google.protobuf" version "0.9.4"
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
@@ -19,6 +23,12 @@ configurations.all {
 }
 
 android {
+    sourceSets {
+        main {
+            proto {
+            }
+        }
+    }
 
     buildFeatures {
         dataBinding true
@@ -249,6 +259,23 @@ android {
     buildToolsVersion '34.0.0'
 }
 
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.3"
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+                kotlin {
+                }
+            }
+        }
+    }
+}
+
 task copyResDirectoryToClasses(type: Copy) {
     from "${projectDir}/src/test/res"
     into "${buildDir}/intermediates/classes/test/debug/res"
@@ -341,6 +368,10 @@ dependencies {
     def lifecycle_version = "2.4.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+
+    // Protobuf
+    implementation 'com.google.protobuf:protobuf-kotlin:3.25.3'
+    implementation(name: 'Lndmobile', ext: 'aar')
 }
 
 task ktlint(type: JavaExec, group: "verification") {
