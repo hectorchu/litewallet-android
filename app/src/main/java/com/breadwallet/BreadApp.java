@@ -33,9 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.pusher.pushnotifications.PushNotifications;
 
 import kotlin.coroutines.EmptyCoroutineContext;
-import kotlinx.coroutines.CoroutineScopeKt;
-import kotlinx.coroutines.CoroutineStart;
-import kotlinx.coroutines.future.FutureKt;
+import kotlinx.coroutines.BuildersKt;
 import timber.log.Timber;
 
 public class BreadApp extends Application {
@@ -78,11 +76,11 @@ public class BreadApp extends Application {
         mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
 
         lnd = new LndManager(getApplicationInfo().dataDir);
-        FutureKt.future(
-            CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
-            EmptyCoroutineContext.INSTANCE,
-            CoroutineStart.DEFAULT,
-            (scope, continuation) -> lnd.start(continuation));
+        try {
+            BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                    (scope, continuation) -> lnd.start(continuation));
+        } catch (java.lang.InterruptedException e) {
+        }
     }
 
 

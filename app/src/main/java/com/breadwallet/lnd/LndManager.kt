@@ -24,7 +24,7 @@ class AlreadyStartedException : Exception()
 class LndManager(dataDir: String) {
     private val lndPath = File(dataDir).resolve("lnd")
     private val testnet = BuildConfig.LITECOIN_TESTNET
-    private var walletState = Channel<WalletState>(CONFLATED)
+    private val walletState = Channel<WalletState>(CONFLATED)
     private var walletExists = false
     private var isStarted = false
 
@@ -37,6 +37,7 @@ class LndManager(dataDir: String) {
             "--litecoin.node=neutrino",
             "--no-macaroons",
             "--tlsdisableautofill",
+            "--sync-freelist",
         )
         if (testnet) {
             args += "--litecoin.testnet"
