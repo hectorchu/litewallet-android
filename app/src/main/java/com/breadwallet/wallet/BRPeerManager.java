@@ -200,7 +200,7 @@ public class BRPeerManager {
         }
         FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
                 EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT,
-                (scope, continuation) -> BreadApp.lnd.addPeer("$host:$port", continuation));
+                (scope, continuation) -> BreadApp.lnd.addPeer(String.format("%s:%d", host, port), continuation));
         //connect();
     }
 

@@ -1,5 +1,7 @@
 package com.breadwallet.tools.util;
 
+import com.breadwallet.BuildConfig;
+
 public class TrustedNode {
     public static  String getNodeHost(String input) {
         if (input.contains(":")) {
@@ -9,7 +11,7 @@ public class TrustedNode {
     }
 
     public static  int getNodePort(String input) {
-        int port = 0;
+        int port = BuildConfig.LITECOIN_TESTNET ? 19335 : 9333;
         if (input.contains(":")) {
             try {
                 port = Integer.parseInt(input.split(":")[1]);
