@@ -12,6 +12,7 @@ import com.breadwallet.presenter.activities.BreadActivity;
 import com.breadwallet.tools.listeners.SyncReceiver;
 import com.breadwallet.tools.util.Utils;
 import com.breadwallet.wallet.BRPeerManager;
+import com.breadwallet.wallet.BRWalletManager;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -131,6 +132,11 @@ public class SyncManager {
                             prevBlockTimeStamp = info.getBestHeaderTimestamp();
                         }
                     } catch (Exception e) {
+                    }
+
+                    if (app != null) {
+                        BRWalletManager.getInstance().refreshBalance(app);
+                        TxManager.getInstance().updateTxList(app);
                     }
 
                     if (app != null && prevBlockTimeStamp > 0) {

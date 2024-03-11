@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 import kotlin.coroutines.EmptyCoroutineContext;
 import kotlinx.coroutines.CoroutineScopeKt;
@@ -95,12 +96,14 @@ public class BRWalletManager {
     }
 
     public void refreshBalance(Activity app) {
-        long nativeBalance = nativeBalance();
-        if (nativeBalance != -1) {
-            setBalance(app, nativeBalance);
-        } else {
-            Timber.i("timber: UpdateUI, nativeBalance is -1 meaning _wallet was null!");
-        }
+        CompletableFuture<Long> future = FutureKt.future(
+                CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
+                EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT,
+                (scope, continuation) -> BreadApp.lnd.getBalance(false, continuation));
+        future.thenApply(balance -> {
+            app.runOnUiThread(() -> setBalance(app, balance));
+            return balance;
+        });
     }
 
     public long getBalance(Context context) {
@@ -245,12 +248,15 @@ public class BRWalletManager {
     }
 
     public static boolean refreshAddress(Context ctx) {
-        String address = getReceiveAddress();
-        if (Utils.isNullOrEmpty(address)) {
-            Timber.d("timber: refreshAddress: WARNING, retrieved address:%s", address);
-            return false;
-        }
-        BRSharedPrefs.putReceiveAddress(ctx, address);
+        CompletableFuture<String> future = FutureKt.future(
+                CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
+                EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT,
+                (scope, continuation) -> BreadApp.lnd.getUnusedAddress(false, continuation));
+        future.thenApply(address -> {
+            Activity app = (Activity)ctx;
+            app.runOnUiThread(() -> BRSharedPrefs.putReceiveAddress(ctx, address));
+            return address;
+        });
         return true;
     }
 

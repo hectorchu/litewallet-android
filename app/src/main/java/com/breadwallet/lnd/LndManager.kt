@@ -2,7 +2,10 @@ package com.breadwallet.lnd
 
 import chainrpc.*
 import com.breadwallet.BuildConfig
+import com.breadwallet.presenter.activities.BreadActivity
+import com.breadwallet.tools.manager.TxManager
 import com.breadwallet.tools.util.TrustedNode
+import com.breadwallet.wallet.BRWalletManager
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
 import kotlinx.coroutines.channels.Channel
@@ -156,6 +159,7 @@ class LndManager(dataDir: String, val trustedNode: String) {
         Lndmobile.chainNotifierRegisterBlockEpochNtfn(req.toByteArray(), LndReceiveStream {
             if (it.isSuccess) {
                 val block = Chainnotifier.BlockEpoch.parseFrom(it.getOrThrow())
+                BRWalletManager.getInstance().refreshBalance(BreadActivity.getApp())
             } else Unit
         })
     }
@@ -165,6 +169,8 @@ class LndManager(dataDir: String, val trustedNode: String) {
         Lndmobile.subscribeTransactions(req.toByteArray(), LndReceiveStream {
             if (it.isSuccess) {
                 val txn = LightningOuterClass.Transaction.parseFrom(it.getOrThrow())
+                BRWalletManager.getInstance().refreshBalance(BreadActivity.getApp())
+                TxManager.getInstance().updateTxList(BreadActivity.getApp())
             } else Unit
         })
     }

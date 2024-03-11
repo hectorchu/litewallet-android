@@ -7,7 +7,6 @@ import com.platform.entities.TxMetaData;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TxItem {
     public static final String TAG = TxItem.class.getName();
