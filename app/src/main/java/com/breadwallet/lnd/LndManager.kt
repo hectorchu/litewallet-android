@@ -14,6 +14,7 @@ import neutrinorpc.*
 import signrpc.*
 import walletrpc.*
 import java.io.File
+import java.util.Optional
 import kotlin.coroutines.suspendCoroutine
 
 class NotStartedException : Exception()
@@ -137,7 +138,7 @@ class LndManager(dataDir: String, val trustedNode: String) {
         subscribeTransactions()
     }
 
-    suspend fun getRecoveryInfo(): Double? {
+    suspend fun getRecoveryInfo(): Optional<Double> {
         if (!isStarted) throw NotStartedException()
         val req = getRecoveryInfoRequest {}
         val data = suspendCoroutine {
@@ -145,9 +146,9 @@ class LndManager(dataDir: String, val trustedNode: String) {
         }
         val resp = LightningOuterClass.GetRecoveryInfoResponse.parseFrom(data)
         if (!resp.recoveryMode || resp.recoveryFinished) {
-            return null
+            return Optional.empty()
         }
-        return resp.progress
+        return Optional.of(resp.progress)
     }
 
     private fun subscribeBlocks() {

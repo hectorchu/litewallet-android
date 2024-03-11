@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.CoroutineScopeKt;
+import kotlinx.coroutines.CoroutineStart;
+import kotlinx.coroutines.future.FutureKt;
+
 import timber.log.Timber;
 
 public class BRPeerManager {
@@ -193,6 +198,9 @@ public class BRPeerManager {
         } else {
             Timber.d("timber: updateFixedPeer: succeeded");
         }
+        FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
+                EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT,
+                (scope, continuation) -> BreadApp.lnd.addPeer("$host:$port", continuation));
         //connect();
     }
 

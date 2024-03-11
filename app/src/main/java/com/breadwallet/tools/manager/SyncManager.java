@@ -6,12 +6,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import com.breadwallet.BreadApp;
+import com.breadwallet.lnd.LndManager;
 import com.breadwallet.presenter.activities.BreadActivity;
 import com.breadwallet.tools.listeners.SyncReceiver;
 import com.breadwallet.tools.util.Utils;
 import com.breadwallet.wallet.BRPeerManager;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 
 import timber.log.Timber;
 
@@ -110,15 +116,43 @@ public class SyncManager {
                     });
                 }
 
+                long prevBlockTimeStamp = 0;
+                long currentTimeStamp = 0;
+                LndManager.GetInfo info = null;
+                Optional<Double> recovery = Optional.empty();
+
                 while (running) {
-                    if (app != null) {
-                        int startHeight = BRSharedPrefs.getStartHeight(app);
-                        progressStatus = BRPeerManager.syncProgress(startHeight);
+                    try {
+                        info = BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                                (scope, continuation) -> BreadApp.lnd.getInfo(continuation));
+                        recovery = BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                                (scope, continuation) -> BreadApp.lnd.getRecoveryInfo(continuation));
+                        if (prevBlockTimeStamp == 0) {
+                            prevBlockTimeStamp = info.getBestHeaderTimestamp();
+                        }
+                    } catch (Exception e) {
+                    }
+
+                    if (app != null && prevBlockTimeStamp > 0) {
+                        if (recovery.isPresent() && recovery.get() > 0) {
+                            currentTimeStamp = 1464739200;
+                            double delta = recovery.get() * (System.currentTimeMillis() / 1000. - currentTimeStamp);
+                            currentTimeStamp += (long)delta;
+                            progressStatus = Math.max(recovery.get(), 0.02);
+                        } else if (!info.getSynced()) {
+                            currentTimeStamp = info.getBestHeaderTimestamp();
+                            progressStatus = currentTimeStamp - prevBlockTimeStamp;
+                            progressStatus /= System.currentTimeMillis() / 1000. - prevBlockTimeStamp;
+                            progressStatus = Math.max(progressStatus, 0.02);
+                        } else {
+                            progressStatus = 1;
+                        }
+
                         if (progressStatus == 1) {
                             running = false;
                             continue;
                         }
-                        final long lastBlockTimeStamp = BRPeerManager.getInstance().getLastBlockTimestamp() * 1000;
+                        final long lastBlockTimeStamp = currentTimeStamp * 1000;
                         app.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
