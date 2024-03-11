@@ -1,5 +1,7 @@
 package com.breadwallet.tools.security;
 
+import static com.breadwallet.tools.crypto.HDKeyKt.MainnetVersion;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import com.breadwallet.presenter.customviews.BRDialogView;
 import com.breadwallet.presenter.entities.PaymentItem;
 import com.breadwallet.presenter.entities.PaymentRequestWrapper;
 import com.breadwallet.tools.animation.BRDialog;
+import com.breadwallet.tools.crypto.HDKey;
 import com.breadwallet.tools.manager.BRSharedPrefs;
 import com.breadwallet.tools.threads.BRExecutor;
 import com.breadwallet.tools.threads.PaymentProtocolPostPaymentTask;
@@ -31,6 +34,10 @@ import com.platform.tools.KVStoreManager;
 import java.io.IOException;
 import java.util.Arrays;
 
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.CoroutineScopeKt;
+import kotlinx.coroutines.CoroutineStart;
+import kotlinx.coroutines.future.FutureKt;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -155,6 +162,13 @@ public class PostAuth {
                     app.startActivity(intent);
                     if (!app.isDestroyed()) app.finish();
                     phraseForKeyStore = null;
+
+                    HDKey key = new HDKey(MainnetVersion, seed);
+                    BreadApp.lnd.deleteWallet();
+                    FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
+                            EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->
+                                    BreadApp.lnd.initWallet("password", key.toExtendedKey(),
+                                            1464739200, 10, continuation));
                 }
             }
 

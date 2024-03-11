@@ -193,7 +193,7 @@ public class BRPeerManager {
         } else {
             Timber.d("timber: updateFixedPeer: succeeded");
         }
-        connect();
+        //connect();
     }
 
     public void networkChanged(boolean isOnline) {
@@ -201,7 +201,7 @@ public class BRPeerManager {
             BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
                 @Override
                 public void run() {
-                    BRPeerManager.getInstance().connect();
+                    //BRPeerManager.getInstance().connect();
                 }
             });
     }

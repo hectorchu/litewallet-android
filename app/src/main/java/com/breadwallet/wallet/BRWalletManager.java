@@ -1,5 +1,7 @@
 package com.breadwallet.wallet;
 
+import static com.breadwallet.tools.crypto.HDKeyKt.MainnetVersion;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
@@ -37,6 +39,7 @@ import com.breadwallet.presenter.interfaces.BROnSignalCompletion;
 import com.breadwallet.tools.animation.BRAnimator;
 import com.breadwallet.tools.animation.BRDialog;
 import com.breadwallet.tools.animation.SpringAnimator;
+import com.breadwallet.tools.crypto.HDKey;
 import com.breadwallet.tools.manager.AnalyticsManager;
 import com.breadwallet.tools.manager.BRNotificationManager;
 import com.breadwallet.tools.manager.BRSharedPrefs;
@@ -63,6 +66,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.CoroutineScopeKt;
+import kotlinx.coroutines.CoroutineStart;
+import kotlinx.coroutines.future.FutureKt;
 
 import timber.log.Timber;
 
@@ -175,6 +183,13 @@ public class BRWalletManager {
         byte[] strBytes = TypesConverter.getNullTerminatedPhrase(strPhrase);
         byte[] pubKey = BRWalletManager.getInstance().getMasterPubKey(strBytes);
         BRKeyStore.putMasterPublicKey(pubKey, ctx);
+
+        HDKey key = new HDKey(MainnetVersion, seed);
+        BreadApp.lnd.deleteWallet();
+        FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
+                EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->
+                        BreadApp.lnd.initWallet("password", key.toExtendedKey(),
+                                walletCreationTime, 10, continuation));
 
         return true;
 
@@ -551,7 +566,7 @@ public class BRWalletManager {
                     BRPeerManager.getInstance().updateFixedPeer(ctx);
                 }
 
-                pm.connect();
+                //pm.connect();
                 if (BRSharedPrefs.getStartHeight(ctx) == 0) {
                     BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
                         @Override
@@ -561,6 +576,11 @@ public class BRWalletManager {
                     });
                 }
 
+            if (BreadApp.lnd.getWalletExists()) {
+                FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
+                        EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->
+                                BreadApp.lnd.unlockWallet("password", 10, continuation));
+            }
 
         } finally {
             itInitiatingWallet = false;

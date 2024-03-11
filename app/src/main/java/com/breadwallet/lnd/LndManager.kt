@@ -2,13 +2,10 @@ package com.breadwallet.lnd
 
 import chainrpc.*
 import com.breadwallet.BuildConfig
+import com.breadwallet.tools.manager.BRSharedPrefs
+import com.breadwallet.tools.util.TrustedNode
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
-import java.io.File
-import kotlin.coroutines.suspendCoroutine
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import lndmobile.Lndmobile
@@ -17,16 +14,20 @@ import lnrpc.Stateservice.WalletState
 import neutrinorpc.*
 import signrpc.*
 import walletrpc.*
+import java.io.File
+import kotlin.coroutines.suspendCoroutine
 
 class NotStartedException : Exception()
 class AlreadyStartedException : Exception()
 
-class LndManager(dataDir: String) {
+class LndManager(dataDir: String, val trustedNode: String) {
     private val lndPath = File(dataDir).resolve("lnd")
     private val testnet = BuildConfig.LITECOIN_TESTNET
     private val walletState = Channel<WalletState>(CONFLATED)
-    private var walletExists = false
-    private var isStarted = false
+    var walletExists = false
+        private set
+    var isStarted = false
+        private set
 
     suspend fun start() {
         if (isStarted) throw AlreadyStartedException()
@@ -44,6 +45,11 @@ class LndManager(dataDir: String) {
         } else {
             args += "--litecoin.mainnet"
             args += "--feeurl=https://litecoinspace.org/api/v1/fees/recommended-lnd"
+        }
+        if (trustedNode != "") {
+            val host = TrustedNode.getNodeHost(trustedNode)
+            val port = TrustedNode.getNodePort(trustedNode)
+            args += "--neutrino.addpeer=$host:$port"
         }
         suspendCoroutine {
             Lndmobile.start(args.joinToString(separator = " "), LndCallback(it))
@@ -89,14 +95,14 @@ class LndManager(dataDir: String) {
     suspend fun initWallet(
         password: String,
         xprv: String,
-        creationTime: Duration,
+        creationTime: Long,
         recoveryWindow: Int
     ) {
         if (!isStarted) throw NotStartedException()
         val req = initWalletRequest {
             walletPassword = ByteString.copyFromUtf8(password)
             extendedMasterKey = xprv
-            extendedMasterKeyBirthdayTimestamp = creationTime.toLong(DurationUnit.SECONDS)
+            extendedMasterKeyBirthdayTimestamp = creationTime
             this.recoveryWindow = recoveryWindow
         }
         suspendCoroutine {
@@ -190,7 +196,7 @@ class LndManager(dataDir: String) {
         val numPeers: Int,
         val blockHeight: Int,
         val blockHash: String,
-        val bestHeaderTimestamp: Duration,
+        val bestHeaderTimestamp: Long,
         val synced: Boolean
     )
 
@@ -202,8 +208,7 @@ class LndManager(dataDir: String) {
         }
         val resp = LightningOuterClass.GetInfoResponse.parseFrom(data)
         return GetInfo(resp.numPeers, resp.blockHeight, resp.blockHash,
-            resp.bestHeaderTimestamp.toDuration(DurationUnit.SECONDS),
-            resp.syncedToChain)
+            resp.bestHeaderTimestamp, resp.syncedToChain)
     }
 
     suspend fun getBalance(confirmed: Boolean): Long {

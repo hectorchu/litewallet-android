@@ -15,6 +15,7 @@ import com.breadwallet.presenter.activities.util.BRActivity;
 import com.breadwallet.presenter.entities.PartnerNames;
 import com.breadwallet.tools.listeners.SyncReceiver;
 import com.breadwallet.tools.manager.AnalyticsManager;
+import com.breadwallet.tools.manager.BRSharedPrefs;
 import com.breadwallet.tools.util.BRConstants;
 import com.breadwallet.tools.util.LocaleHelper;
 import com.breadwallet.tools.util.Utils;
@@ -75,7 +76,7 @@ public class BreadApp extends Application {
         DISPLAY_HEIGHT_PX = size.y;
         mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
 
-        lnd = new LndManager(getApplicationInfo().dataDir);
+        lnd = new LndManager(getApplicationInfo().dataDir, BRSharedPrefs.getTrustNode(getBreadContext()));
         try {
             BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
                     (scope, continuation) -> lnd.start(continuation));
