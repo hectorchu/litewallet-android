@@ -169,7 +169,7 @@ class LndManager(dataDir: String, val trustedNode: String) {
         })
     }
 
-    suspend fun getTransactions(): List<LndTransaction> {
+    suspend fun getTransactions(): Array<LndTransaction> {
         if (!isStarted) throw NotStartedException()
         val req = getTransactionsRequest {}
         val data = suspendCoroutine {
@@ -189,7 +189,7 @@ class LndManager(dataDir: String, val trustedNode: String) {
             balance += transaction.amount
             transaction.balanceAfter = balance
         }
-        return transactions
+        return transactions.toTypedArray()
     }
 
     class GetInfo(

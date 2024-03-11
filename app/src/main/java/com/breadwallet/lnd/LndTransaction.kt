@@ -19,7 +19,7 @@ class LndTransaction() {
     var outputs = listOf<Output>()
     var blockHeight = 0
     var confirms = 0
-    var timestamp = ZERO
+    var timestamp = 0L
     var balanceAfter = 0L
     var raw = byteArrayOf()
     var label = ""
@@ -37,7 +37,7 @@ class LndTransaction() {
         }.map { Output(it.address, it.amount, it.isOurAddress) }
         this.blockHeight = transaction.blockHeight
         this.confirms = transaction.numConfirmations
-        this.timestamp = transaction.timeStamp.toDuration(DurationUnit.SECONDS)
+        this.timestamp = transaction.timeStamp
         this.label = transaction.label
     }
 }

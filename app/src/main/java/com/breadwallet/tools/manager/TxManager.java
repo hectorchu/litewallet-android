@@ -13,7 +13,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.breadwallet.R;
+import com.breadwallet.BreadApp;
+import com.breadwallet.lnd.LndTransaction;
 import com.breadwallet.presenter.activities.BreadActivity;
 import com.breadwallet.presenter.entities.TxItem;
 import com.breadwallet.tools.adapter.TransactionListAdapter;
@@ -21,11 +22,14 @@ import com.breadwallet.tools.animation.BRAnimator;
 import com.breadwallet.tools.listeners.RecyclerItemClickListener;
 import com.breadwallet.tools.threads.BRExecutor;
 import com.breadwallet.wallet.BRPeerManager;
-import com.breadwallet.wallet.BRWalletManager;
 
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 
 import timber.log.Timber;
 
@@ -154,8 +158,16 @@ public class TxManager {
     @WorkerThread
     public synchronized void updateTxList(final Context app) {
         long start = System.currentTimeMillis();
-        final TxItem[] arr = BRWalletManager.getInstance().getTransactions();
-        final List<TxItem> items = arr == null ? null : new LinkedList<>(Arrays.asList(arr));
+        LndTransaction[] arr;
+        try {
+            arr = BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                    (scope, continuation) -> BreadApp.lnd.getTransactions(continuation));
+        } catch (Exception e) {
+            return;
+        }
+        List<TxItem> temp = Arrays.stream(arr).map(TxItem::new).collect(Collectors.toList());
+        Collections.reverse(temp);
+        final List<TxItem> items = temp;
 
         long took = (System.currentTimeMillis() - start);
         if (took > 500)
