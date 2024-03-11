@@ -5,6 +5,10 @@ import com.breadwallet.lnd.LndTransaction;
 import com.breadwallet.tools.util.Utils;
 import com.platform.entities.TxMetaData;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class TxItem {
     public static final String TAG = TxItem.class.getName();
     private long timeStamp;
@@ -48,20 +52,17 @@ public class TxItem {
         this.blockHeight = txn.getBlockHeight();
         this.txReversed = txn.getTxHash();
         this.txHash = Utils.hexToBytes(Utils.reverseHex(txn.getTxHash()));
-        if (txn.getAmount() < 0) {
-            this.sent = -txn.getAmount();
-            this.received = 0;
-        } else {
-            this.sent = 0;
-            this.received = txn.getAmount();
-        }
+        this.sent = txn.getAmount() < 0 ? -txn.getAmount() : 0;
+        this.received = txn.getAmount() >= 0 ? txn.getAmount() : 0;
         this.fee = txn.getFee();
-        this.to = txn.getOutputs().stream()
-                .map(LndTransaction.Output::getAddress).toArray(String[]::new);
+        List<LndTransaction.Output> outputs = txn.getOutputs().stream()
+                .filter(output -> (this.sent > this.fee) != output.isOurs())
+                .collect(Collectors.toList());
+        this.to = outputs.stream().map(LndTransaction.Output::getAddress).toArray(String[]::new);
         this.from = new String[0];
         this.balanceAfterTx = txn.getBalanceAfter();
-        this.outAmounts = txn.getOutputs().stream()
-                .map(LndTransaction.Output::getAmount).mapToLong(Long::longValue).toArray();
+        this.outAmounts = outputs.stream().map(LndTransaction.Output::getAmount)
+                .mapToLong(Long::longValue).toArray();
         this.isValid = true;
         this.txSize = txn.getRaw().length;
     }

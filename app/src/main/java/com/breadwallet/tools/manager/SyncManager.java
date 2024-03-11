@@ -153,6 +153,7 @@ public class SyncManager {
                             continue;
                         }
                         final long lastBlockTimeStamp = currentTimeStamp * 1000;
+                        final int lastBlockHeight = info.getBlockHeight();
                         app.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -166,6 +167,7 @@ public class SyncManager {
                                     TxManager.getInstance().syncingHolder.progress.setProgress((int) (progressStatus * 100));
                                 if (TxManager.getInstance().syncingHolder != null)
                                     TxManager.getInstance().syncingHolder.date.setText(Utils.formatTimeStamp(lastBlockTimeStamp, "MMM. dd, yyyy  ha"));
+                                BRSharedPrefs.putLastBlockHeight(BreadApp.getBreadContext(), lastBlockHeight);
                             }
                         });
 
