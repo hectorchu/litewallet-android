@@ -1,6 +1,7 @@
 package com.breadwallet.wallet;
 
 import static com.breadwallet.tools.crypto.HDKeyKt.MainnetVersion;
+import static com.breadwallet.tools.crypto.HDKeyKt.TestnetVersion;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,6 +25,7 @@ import androidx.annotation.WorkerThread;
 import androidx.fragment.app.FragmentActivity;
 
 import com.breadwallet.BreadApp;
+import com.breadwallet.BuildConfig;
 import com.breadwallet.R;
 import com.breadwallet.presenter.activities.BreadActivity;
 import com.breadwallet.presenter.activities.util.ActivityUTILS;
@@ -184,7 +186,7 @@ public class BRWalletManager {
         byte[] pubKey = BRWalletManager.getInstance().getMasterPubKey(strBytes);
         BRKeyStore.putMasterPublicKey(pubKey, ctx);
 
-        HDKey key = new HDKey(MainnetVersion, seed);
+        HDKey key = new HDKey(BuildConfig.LITECOIN_TESTNET ? TestnetVersion : MainnetVersion, seed);
         BreadApp.lnd.deleteWallet();
         FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
                 EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->

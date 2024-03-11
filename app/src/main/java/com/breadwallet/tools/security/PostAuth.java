@@ -1,6 +1,7 @@
 package com.breadwallet.tools.security;
 
 import static com.breadwallet.tools.crypto.HDKeyKt.MainnetVersion;
+import static com.breadwallet.tools.crypto.HDKeyKt.TestnetVersion;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.os.NetworkOnMainThreadException;
 import android.security.keystore.UserNotAuthenticatedException;
 
 import com.breadwallet.BreadApp;
+import com.breadwallet.BuildConfig;
 import com.breadwallet.R;
 import com.breadwallet.presenter.activities.PaperKeyActivity;
 import com.breadwallet.presenter.activities.PaperKeyProveActivity;
@@ -163,7 +165,7 @@ public class PostAuth {
                     if (!app.isDestroyed()) app.finish();
                     phraseForKeyStore = null;
 
-                    HDKey key = new HDKey(MainnetVersion, seed);
+                    HDKey key = new HDKey(BuildConfig.LITECOIN_TESTNET ? TestnetVersion : MainnetVersion, seed);
                     BreadApp.lnd.deleteWallet();
                     FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
                             EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->

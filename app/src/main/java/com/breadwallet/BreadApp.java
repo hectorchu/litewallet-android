@@ -76,7 +76,7 @@ public class BreadApp extends Application {
         DISPLAY_HEIGHT_PX = size.y;
         mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
 
-        lnd = new LndManager(getApplicationInfo().dataDir, BRSharedPrefs.getTrustNode(getBreadContext()));
+        lnd = new LndManager(getApplicationInfo().dataDir, BRSharedPrefs.getTrustNode(getApplicationContext()));
         try {
             BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
                     (scope, continuation) -> lnd.start(continuation));

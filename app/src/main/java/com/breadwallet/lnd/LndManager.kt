@@ -2,7 +2,6 @@ package com.breadwallet.lnd
 
 import chainrpc.*
 import com.breadwallet.BuildConfig
-import com.breadwallet.tools.manager.BRSharedPrefs
 import com.breadwallet.tools.util.TrustedNode
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
