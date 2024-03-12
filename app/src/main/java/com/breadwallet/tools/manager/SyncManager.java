@@ -136,7 +136,6 @@ public class SyncManager {
 
                     if (app != null) {
                         BRWalletManager.getInstance().refreshBalance(app);
-                        TxManager.getInstance().updateTxList(app);
                     }
 
                     if (app != null && prevBlockTimeStamp > 0) {

@@ -3,7 +3,6 @@ package com.breadwallet.lnd
 import chainrpc.*
 import com.breadwallet.BuildConfig
 import com.breadwallet.presenter.activities.BreadActivity
-import com.breadwallet.tools.manager.TxManager
 import com.breadwallet.tools.util.TrustedNode
 import com.breadwallet.wallet.BRWalletManager
 import com.google.protobuf.ByteString
@@ -170,7 +169,6 @@ class LndManager(dataDir: String, val trustedNode: String) {
             if (it.isSuccess) {
                 val txn = LightningOuterClass.Transaction.parseFrom(it.getOrThrow())
                 BRWalletManager.getInstance().refreshBalance(BreadActivity.getApp())
-                TxManager.getInstance().updateTxList(BreadActivity.getApp())
             } else Unit
         })
     }

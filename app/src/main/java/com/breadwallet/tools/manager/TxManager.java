@@ -177,7 +177,6 @@ public class TxManager {
                 @Override
                 public void run() {
                     adapter.setItems(items);
-                    txList.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
                     Timber.d("timber: updateTxList: %s", currentPrompt);
                 }
