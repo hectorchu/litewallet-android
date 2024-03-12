@@ -190,6 +190,7 @@ class LndManager(dataDir: String, val trustedNode: String) {
             if (it.isSuccess) {
                 val txn = LightningOuterClass.Transaction.parseFrom(it.getOrThrow())
                 BRWalletManager.getInstance().refreshBalance(BreadActivity.getApp())
+                BRWalletManager.onTxAdded(LndTransaction(txn))
             } else Unit
         })
     }

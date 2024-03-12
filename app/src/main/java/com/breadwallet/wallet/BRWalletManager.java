@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.breadwallet.BreadApp;
 import com.breadwallet.BuildConfig;
 import com.breadwallet.R;
+import com.breadwallet.lnd.LndTransaction;
 import com.breadwallet.presenter.activities.BreadActivity;
 import com.breadwallet.presenter.activities.util.ActivityUTILS;
 import com.breadwallet.presenter.customviews.BRDialogView;
@@ -411,26 +412,23 @@ public class BRWalletManager {
 
     }
 
-    public static void onTxAdded(byte[] tx, int blockHeight, long timestamp, final long amount, String hash) {
-        Timber.d("timber: onTxAdded: " + String.format("tx.length: %d, blockHeight: %d, timestamp: %d, amount: %d, hash: %s", tx.length, blockHeight, timestamp, amount, hash));
+    public static void onTxAdded(LndTransaction txn) {
+        Timber.d("timber: onTxAdded: tx.length: %d, blockHeight: %d, timestamp: %d, amount: %d, hash: %s",
+                txn.getRaw().length, txn.getBlockHeight(), txn.getTimestamp(), txn.getAmount(), txn.getTxHash());
 
         final Context ctx = BreadApp.getBreadContext();
-        if (amount > 0) {
+        if (txn.getAmount() > 0) {
             BRExecutor.getInstance().forMainThreadTasks().execute(new Runnable() {
                 @Override
                 public void run() {
-                    String am = BRCurrency.getFormattedCurrencyString(ctx, "LTC", BRExchange.getBitcoinForSatoshis(ctx, new BigDecimal(amount)));
-                    String amCur = BRCurrency.getFormattedCurrencyString(ctx, BRSharedPrefs.getIso(ctx), BRExchange.getAmountFromSatoshis(ctx, BRSharedPrefs.getIso(ctx), new BigDecimal(amount)));
+                    String am = BRCurrency.getFormattedCurrencyString(ctx, "LTC", BRExchange.getBitcoinForSatoshis(ctx, new BigDecimal(txn.getAmount())));
+                    String amCur = BRCurrency.getFormattedCurrencyString(ctx, BRSharedPrefs.getIso(ctx), BRExchange.getAmountFromSatoshis(ctx, BRSharedPrefs.getIso(ctx), new BigDecimal(txn.getAmount())));
                     String formatted = String.format("%s (%s)", am, amCur);
                     String strToShow = String.format(ctx.getString(R.string.TransactionDetails_received), formatted);
                     showToastWithMessage(ctx, strToShow);
                 }
             });
         }
-        if (ctx != null)
-            TransactionDataSource.getInstance(ctx).putTransaction(new BRTransactionEntity(tx, blockHeight, timestamp, hash));
-        else
-            Timber.i("timber: onTxAdded: ctx is null!");
     }
 
     private static void showToastWithMessage(Context ctx, final String message) {

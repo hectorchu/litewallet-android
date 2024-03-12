@@ -38,6 +38,7 @@ class LndTransaction() {
         this.blockHeight = transaction.blockHeight
         this.confirms = transaction.numConfirmations
         this.timestamp = transaction.timeStamp
+        this.raw = transaction.rawTxHexBytes.toByteArray()
         this.label = transaction.label
     }
 }
