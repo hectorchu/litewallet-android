@@ -11,7 +11,6 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
-import kotlinx.coroutines.channels.onClosed
 import lndmobile.Lndmobile
 import lnrpc.LightningOuterClass
 import lnrpc.Stateservice.WalletState
