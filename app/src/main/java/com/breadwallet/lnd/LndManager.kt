@@ -11,6 +11,7 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
+import kotlinx.coroutines.channels.onClosed
 import lndmobile.Lndmobile
 import lnrpc.LightningOuterClass
 import lnrpc.Stateservice.WalletState
@@ -39,7 +40,7 @@ class AlreadyStartedException : Exception()
 class LndManager(dataDir: String, val trustedNode: String) {
     private val lndPath = File(dataDir).resolve("lnd")
     private val testnet = BuildConfig.LITECOIN_TESTNET
-    private val walletState = Channel<WalletState>(CONFLATED)
+    private var walletState = Channel<WalletState>()
     var walletExists = false
         private set
     var isStarted = false
@@ -70,6 +71,7 @@ class LndManager(dataDir: String, val trustedNode: String) {
         suspendCoroutine {
             Lndmobile.start(args.joinToString(separator = " "), LndCallback(it))
         }
+        walletState = Channel(CONFLATED)
         val req = subscribeStateRequest {}
         Lndmobile.subscribeState(req.toByteArray(), LndReceiveStream { result ->
             result.fold({
@@ -93,6 +95,8 @@ class LndManager(dataDir: String, val trustedNode: String) {
         suspendCoroutine {
             Lndmobile.stopDaemon(req.toByteArray(), LndCallback(it))
         }
+        SyncManager.getInstance().stopSyncingProgressThread()
+        while (!walletState.receiveCatching().isClosed) {}
         isStarted = false
     }
 

@@ -185,6 +185,7 @@ public class SyncManager {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                         Timber.e(e, "timber:run: Thread.sleep was Interrupted:%s", Thread.currentThread().getName());
+                        running = false;
                     }
                 }
                 Timber.d("timber: run: SyncProgress task finished:%s", Thread.currentThread().getName());

@@ -16,7 +16,6 @@ import com.breadwallet.presenter.entities.PartnerNames;
 import com.breadwallet.tools.listeners.SyncReceiver;
 import com.breadwallet.tools.manager.AnalyticsManager;
 import com.breadwallet.tools.manager.BRSharedPrefs;
-import com.breadwallet.tools.manager.SyncManager;
 import com.breadwallet.tools.util.BRConstants;
 import com.breadwallet.tools.util.LocaleHelper;
 import com.breadwallet.tools.util.Utils;
