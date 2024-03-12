@@ -10,6 +10,7 @@ import com.breadwallet.BreadApp;
 import com.breadwallet.lnd.LndManager;
 import com.breadwallet.presenter.activities.BreadActivity;
 import com.breadwallet.tools.listeners.SyncReceiver;
+import com.breadwallet.tools.security.BRKeyStore;
 import com.breadwallet.tools.util.Utils;
 import com.breadwallet.wallet.BRPeerManager;
 import com.breadwallet.wallet.BRWalletManager;
@@ -140,7 +141,7 @@ public class SyncManager {
 
                     if (app != null && prevBlockTimeStamp > 0) {
                         if (recovery.isPresent() && recovery.get() > 0) {
-                            currentTimeStamp = 1464739200;
+                            currentTimeStamp = BRKeyStore.getWalletCreationTime(app);
                             double delta = recovery.get() * (System.currentTimeMillis() / 1000. - currentTimeStamp);
                             currentTimeStamp += (long)delta;
                             progressStatus = Math.max(recovery.get(), 0.02);

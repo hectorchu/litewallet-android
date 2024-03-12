@@ -164,13 +164,15 @@ public class PostAuth {
                     app.startActivity(intent);
                     if (!app.isDestroyed()) app.finish();
                     phraseForKeyStore = null;
+                    int walletCreationTime = 1464739200;
+                    BRKeyStore.putWalletCreationTime(walletCreationTime, app);
 
                     HDKey key = new HDKey(BuildConfig.LITECOIN_TESTNET ? TestnetVersion : MainnetVersion, seed);
                     BreadApp.lnd.deleteWallet();
                     FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
                             EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->
                                     BreadApp.lnd.initWallet("password", key.toExtendedKey(),
-                                            1464739200, 10, continuation));
+                                            walletCreationTime, 10, continuation));
                 }
             }
 
