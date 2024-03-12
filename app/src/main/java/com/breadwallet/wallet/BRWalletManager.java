@@ -71,6 +71,7 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 import kotlinx.coroutines.CoroutineScopeKt;
 import kotlinx.coroutines.CoroutineStart;
 import kotlinx.coroutines.future.FutureKt;
@@ -190,7 +191,6 @@ public class BRWalletManager {
         BRKeyStore.putMasterPublicKey(pubKey, ctx);
 
         HDKey key = new HDKey(BuildConfig.LITECOIN_TESTNET ? TestnetVersion : MainnetVersion, seed);
-        BreadApp.lnd.deleteWallet();
         FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
                 EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->
                         BreadApp.lnd.initWallet("password", key.toExtendedKey(),
@@ -265,6 +265,13 @@ public class BRWalletManager {
         BRExecutor.getInstance().forLightWeightBackgroundTasks().execute(new Runnable() {
             @Override
             public void run() {
+                try {
+                    BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                            (scope, continuation) -> BreadApp.lnd.stop(continuation));
+                } catch (Exception e) {
+                }
+                BreadApp.lnd.deleteWallet();
+
                 Timber.d("timber: Running peerManagerFreeEverything");
                 BRPeerManager.getInstance().peerManagerFreeEverything();
                 walletFreeEverything();
@@ -272,6 +279,12 @@ public class BRWalletManager {
                 MerkleBlockDataSource.getInstance(ctx).deleteAllBlocks();
                 PeerDataSource.getInstance(ctx).deleteAllPeers();
                 BRSharedPrefs.clearAllPrefs(ctx);
+
+                try {
+                    BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                            (scope, continuation) -> BreadApp.lnd.start(continuation));
+                } catch (Exception e) {
+                }
             }
         });
     }

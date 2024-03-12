@@ -168,7 +168,6 @@ public class PostAuth {
                     BRKeyStore.putWalletCreationTime(walletCreationTime, app);
 
                     HDKey key = new HDKey(BuildConfig.LITECOIN_TESTNET ? TestnetVersion : MainnetVersion, seed);
-                    BreadApp.lnd.deleteWallet();
                     FutureKt.future(CoroutineScopeKt.CoroutineScope(EmptyCoroutineContext.INSTANCE),
                             EmptyCoroutineContext.INSTANCE, CoroutineStart.DEFAULT, (scope, continuation) ->
                                     BreadApp.lnd.initWallet("password", key.toExtendedKey(),

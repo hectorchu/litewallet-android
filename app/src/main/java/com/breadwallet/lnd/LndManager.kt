@@ -1,8 +1,10 @@
 package com.breadwallet.lnd
 
-import chainrpc.*
+import chainrpc.Chainnotifier
+import chainrpc.blockEpoch
 import com.breadwallet.BuildConfig
 import com.breadwallet.presenter.activities.BreadActivity
+import com.breadwallet.tools.manager.SyncManager
 import com.breadwallet.tools.util.TrustedNode
 import com.breadwallet.wallet.BRWalletManager
 import com.google.protobuf.ByteString
@@ -10,11 +12,23 @@ import com.google.protobuf.kotlin.toByteString
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import lndmobile.Lndmobile
-import lnrpc.*
+import lnrpc.LightningOuterClass
 import lnrpc.Stateservice.WalletState
-import neutrinorpc.*
-import signrpc.*
-import walletrpc.*
+import lnrpc.getInfoRequest
+import lnrpc.getRecoveryInfoRequest
+import lnrpc.getTransactionsRequest
+import lnrpc.initWalletRequest
+import lnrpc.newAddressRequest
+import lnrpc.sendCoinsRequest
+import lnrpc.stopRequest
+import lnrpc.subscribeStateRequest
+import lnrpc.unlockWalletRequest
+import lnrpc.walletBalanceRequest
+import neutrinorpc.Neutrino
+import neutrinorpc.addPeerRequest
+import signrpc.txOut
+import walletrpc.Walletkit
+import walletrpc.sendOutputsRequest
 import java.io.File
 import java.util.Optional
 import kotlin.coroutines.suspendCoroutine
@@ -75,11 +89,11 @@ class LndManager(dataDir: String, val trustedNode: String) {
 
     suspend fun stop() {
         if (!isStarted) throw NotStartedException()
-        isStarted = false
         val req = stopRequest {}
         suspendCoroutine {
             Lndmobile.stopDaemon(req.toByteArray(), LndCallback(it))
         }
+        isStarted = false
     }
 
     fun deleteWallet() {
@@ -112,7 +126,9 @@ class LndManager(dataDir: String, val trustedNode: String) {
         }
         while (true) {
             val state = walletState.receive()
-            if (state == WalletState.SERVER_ACTIVE) {
+            if (state == WalletState.RPC_ACTIVE) {
+                SyncManager.getInstance().startSyncingProgressThread()
+            } else if (state == WalletState.SERVER_ACTIVE) {
                 break
             }
         }
@@ -132,7 +148,9 @@ class LndManager(dataDir: String, val trustedNode: String) {
         }
         while (true) {
             val state = walletState.receive()
-            if (state == WalletState.SERVER_ACTIVE) {
+            if (state == WalletState.RPC_ACTIVE) {
+                SyncManager.getInstance().startSyncingProgressThread()
+            } else if (state == WalletState.SERVER_ACTIVE) {
                 break
             }
         }

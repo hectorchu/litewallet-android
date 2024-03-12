@@ -26,16 +26,26 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.pusher.pushnotifications.PushNotifications;
 
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import kotlin.coroutines.EmptyCoroutineContext;
 import kotlinx.coroutines.BuildersKt;
+
 import timber.log.Timber;
 
 public class BreadApp extends Application {
@@ -77,11 +87,11 @@ public class BreadApp extends Application {
         DISPLAY_HEIGHT_PX = size.y;
         mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
 
-        lnd = new LndManager(getApplicationInfo().dataDir, BRSharedPrefs.getTrustNode(getApplicationContext()));
+        lnd = new LndManager(getApplicationInfo().dataDir,
+                BRSharedPrefs.getTrustNode(getApplicationContext()));
         try {
             BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
                     (scope, continuation) -> lnd.start(continuation));
-            SyncManager.getInstance().startSyncingProgressThread();
         } catch (InterruptedException e) {
         }
     }
