@@ -371,7 +371,7 @@ dependencies {
 
     // Protobuf
     implementation 'com.google.protobuf:protobuf-kotlin:3.25.3'
-    implementation(name: 'Lndmobile', ext: 'aar')
+    implementation files('libs/lnd-framework/Lndmobile.aar')
 }
 
 task ktlint(type: JavaExec, group: "verification") {

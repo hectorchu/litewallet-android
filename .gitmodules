@@ -4,3 +4,7 @@
 [submodule "app/src/main/jni/loafwallet-core"]
 	path = app/src/main/jni/loafwallet-core
 	url = https://github.com/litecoin-foundation/loafwallet-core.git
+[submodule "app/libs/lnd-framework"]
+	path = app/libs/lnd-framework
+	url = git@github.com:litecoin-foundation/litewallet-lnd-framework-android.git
+	shallow = true
