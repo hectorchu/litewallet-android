@@ -9,8 +9,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -25,6 +23,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.breadwallet.R;
 import com.breadwallet.presenter.activities.BreadActivity;
@@ -58,7 +58,7 @@ public class BRAnimator {
     public static int SLIDE_ANIMATION_DURATION = 300;
     public static boolean supportIsShowing;
 
-    public static void showBreadSignal(Activity activity, String title, String iconDescription, int drawableId, BROnSignalCompletion completion) {
+    public static void showBreadSignal(FragmentActivity activity, String title, String iconDescription, int drawableId, BROnSignalCompletion completion) {
         fragmentSignal = new FragmentSignal();
         Bundle bundle = new Bundle();
         bundle.putString(FragmentSignal.TITLE, title);
@@ -66,7 +66,7 @@ public class BRAnimator {
         fragmentSignal.setCompletion(completion);
         bundle.putInt(FragmentSignal.RES_ID, drawableId);
         fragmentSignal.setArguments(bundle);
-        FragmentTransaction transaction = activity.getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.from_bottom, R.animator.to_bottom, R.animator.from_bottom, R.animator.to_bottom);
         transaction.add(android.R.id.content, fragmentSignal, fragmentSignal.getClass().getName());
         transaction.addToBackStack(null);
@@ -121,20 +121,13 @@ public class BRAnimator {
         }
     }
 
-    public static void popBackStackTillEntry(Activity app, int entryIndex) {
-
-        if (app.getFragmentManager() == null) {
+    public static void popBackStackTillEntry(FragmentActivity app, int entryIndex) {
+        FragmentManager fm = app.getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() <= entryIndex) {
             return;
         }
-        if (app.getFragmentManager().getBackStackEntryCount() <= entryIndex) {
-            return;
-        }
-        FragmentManager.BackStackEntry entry = app.getFragmentManager().getBackStackEntryAt(
-                entryIndex);
-        if (entry != null) {
-            app.getFragmentManager().popBackStackImmediate(entry.getId(),
-                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
+        FragmentManager.BackStackEntry entry = fm.getBackStackEntryAt(entryIndex);
+        fm.popBackStackImmediate(entry.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     public static void showTransactionPager(Activity app, List<TxItem> items, int position) {
@@ -282,24 +275,24 @@ public class BRAnimator {
                 .commit();
     }
 
-    public static void showMenuFragment(Activity app) {
+    public static void showMenuFragment(FragmentActivity app) {
         if (app == null) {
             Timber.i("timber: showReceiveFragment: app is null");
             return;
         }
-        FragmentTransaction transaction = app.getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = app.getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(0, 0, 0, R.animator.plain_300);
         transaction.add(android.R.id.content, new FragmentMenu(), FragmentMenu.class.getName());
         transaction.addToBackStack(FragmentMenu.class.getName());
         transaction.commit();
     }
 
-    public static void showGreetingsMessage(Activity app) {
+    public static void showGreetingsMessage(FragmentActivity app) {
         if (app == null) {
             Timber.i("timber: showGreetingsMessage: app is null");
             return;
         }
-        FragmentTransaction transaction = app.getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = app.getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(0, 0, 0, R.animator.plain_300);
         transaction.add(android.R.id.content, new FragmentGreetings(), FragmentGreetings.class.getName());
         transaction.addToBackStack(FragmentGreetings.class.getName());
@@ -324,9 +317,13 @@ public class BRAnimator {
         } else return false;
     }
 
-    public static void killAllFragments(Activity app) {
-        if (app != null && !app.isDestroyed())
-            app.getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    public static void killAllFragments(FragmentActivity app) {
+        if (app != null && !app.isDestroyed()) {
+            FragmentManager fm = app.getSupportFragmentManager();
+            for (int i = 0; i < fm.getBackStackEntryCount(); i++) {
+                fm.popBackStack();
+            }
+        }
     }
 
     public static void startBreadIfNotStarted(Activity app) {

@@ -209,7 +209,6 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 break;
             case 2:
                 percentage = "40%";
-                availableForSpend = true;
                 break;
             case 3:
                 percentage = "60%";
@@ -223,6 +222,9 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 percentage = "100%";
                 availableForSpend = true;
                 break;
+        }
+        if (confirms < item.lockedFor) {
+            availableForSpend = false;
         }
         if (availableForSpend && received) {
             convertView.status_2.setText(mContext.getString(R.string.Transaction_available));

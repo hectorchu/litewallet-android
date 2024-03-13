@@ -23,6 +23,7 @@ public class TxItem {
     private boolean isValid;
     private int txSize;
     public String comment;
+    public int lockedFor;
 
     private TxItem() {
     }
@@ -65,6 +66,7 @@ public class TxItem {
         this.txSize = txn.getRaw().length;
         this.comment = txn.getLabel();
         if (this.comment.equals("external")) this.comment = "";
+        this.lockedFor = txn.getHogEx() ? 6 : 0;
     }
 
     public int getBlockHeight() {

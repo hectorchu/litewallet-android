@@ -1,11 +1,8 @@
 package com.breadwallet.lnd
 
 import com.breadwallet.tools.util.Utils
-import lnrpc.LightningOuterClass
 import lnrpc.LightningOuterClass.OutputScriptType
-import kotlin.time.Duration.Companion.ZERO
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import lnrpc.LightningOuterClass.Transaction
 
 class LndTransaction() {
     class Input(val txHash: String, val index: Int, val isOurs: Boolean)
@@ -24,8 +21,9 @@ class LndTransaction() {
     var balanceAfter = 0L
     var raw = byteArrayOf()
     var label = ""
+    var hogEx = false
 
-    constructor(transaction: LightningOuterClass.Transaction) : this() {
+    constructor(transaction: Transaction) : this() {
         this.txHash = transaction.txHash
         this.amount = transaction.amount
         this.fee = transaction.totalFees
@@ -41,5 +39,14 @@ class LndTransaction() {
         this.timestamp = transaction.timeStamp
         this.raw = Utils.hexToBytes(transaction.rawTxHex)
         this.label = transaction.label
+        this.hogEx = isHogEx(transaction)
+    }
+
+    private fun isHogEx(transaction: Transaction): Boolean {
+        if (transaction.outputDetailsCount == 0) {
+            return false
+        }
+        return transaction.getOutputDetails(0).outputType ==
+                OutputScriptType.SCRIPT_TYPE_WITNESS_MWEB_HOGADDR
     }
 }

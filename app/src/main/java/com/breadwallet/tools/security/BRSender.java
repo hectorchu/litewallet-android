@@ -3,6 +3,8 @@ package com.breadwallet.tools.security;
 import android.app.Activity;
 import android.content.Context;
 
+import androidx.fragment.app.FragmentActivity;
+
 import com.breadwallet.R;
 import com.breadwallet.presenter.customviews.BRDialogView;
 import com.breadwallet.presenter.entities.PaymentItem;
@@ -296,7 +298,7 @@ public class BRSender {
                         BRExecutor.getInstance().forMainThreadTasks().execute(new Runnable() {
                             @Override
                             public void run() {
-                                BRAnimator.killAllFragments((Activity) ctx);
+                                BRAnimator.killAllFragments((FragmentActivity) ctx);
                                 BRAnimator.startBreadIfNotStarted((Activity) ctx);
                             }
                         });

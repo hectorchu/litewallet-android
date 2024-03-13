@@ -198,7 +198,7 @@ class FragmentSend : Fragment() {
     }
 
     private fun setListeners() {
-        amountEdit.setOnClickListener {
+        val amountListener = View.OnClickListener {
             showKeyboard(true)
             if (amountLabelOn) { //only first time
                 amountLabelOn = false
@@ -261,6 +261,8 @@ class FragmentSend : Fragment() {
                 set.applyTo(amountLayout)
             }
         }
+        amountEdit.setOnClickListener(amountListener)
+        isoText.setOnClickListener(amountListener)
 
         //needed to fix the overlap bug
         commentEdit.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->

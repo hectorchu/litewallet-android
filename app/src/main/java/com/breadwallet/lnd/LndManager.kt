@@ -4,6 +4,7 @@ import chainrpc.Chainnotifier
 import chainrpc.blockEpoch
 import com.breadwallet.BuildConfig
 import com.breadwallet.presenter.activities.BreadActivity
+import com.breadwallet.tools.manager.BRSharedPrefs
 import com.breadwallet.tools.manager.SyncManager
 import com.breadwallet.tools.util.TrustedNode
 import com.breadwallet.wallet.BRWalletManager
@@ -179,6 +180,7 @@ class LndManager(dataDir: String, val trustedNode: String) {
         Lndmobile.chainNotifierRegisterBlockEpochNtfn(req.toByteArray(), LndReceiveStream {
             if (it.isSuccess) {
                 val block = Chainnotifier.BlockEpoch.parseFrom(it.getOrThrow())
+                BRSharedPrefs.putLastBlockHeight(BreadActivity.getApp(), block.height)
                 BRWalletManager.getInstance().refreshBalance(BreadActivity.getApp())
             } else Unit
         })

@@ -147,7 +147,6 @@ public class FragmentTransactionItem extends Fragment {
                 break;
             case 2:
                 percentage = "40%";
-                availableForSpend = true;
                 break;
             case 3:
                 percentage = "60%";
@@ -161,6 +160,10 @@ public class FragmentTransactionItem extends Fragment {
                 percentage = "100%";
                 availableForSpend = true;
                 break;
+        }
+
+        if (getConfirms(item) < item.lockedFor) {
+            availableForSpend = false;
         }
 
         boolean removeView = sent || !availableForSpend;
@@ -191,9 +194,13 @@ public class FragmentTransactionItem extends Fragment {
         mAddressText.setText(addr);
     }
 
-    private int getLevel(TxItem item) {
+    private int getConfirms(TxItem item) {
         int blockHeight = item.getBlockHeight();
-        int confirms = blockHeight == 0 ? 0 : BRSharedPrefs.getLastBlockHeight(getContext()) - blockHeight + 1;
+        return blockHeight == 0 ? 0 : BRSharedPrefs.getLastBlockHeight(getContext()) - blockHeight + 1;
+    }
+
+    private int getLevel(TxItem item) {
+        int confirms = getConfirms(item);
         int level;
         if (confirms <= 0) {
             int relayCount = BRPeerManager.getRelayCount(item.getTxHash());
