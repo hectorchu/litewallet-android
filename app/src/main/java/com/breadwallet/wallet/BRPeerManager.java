@@ -238,7 +238,7 @@ public class BRPeerManager {
     public static void updateLastBlockHeight(int blockHeight) {
         final Context ctx = BreadApp.getBreadContext();
         if (ctx == null) return;
-        BRSharedPrefs.putLastBlockHeight(ctx, blockHeight);
+        //BRSharedPrefs.putLastBlockHeight(ctx, blockHeight);
     }
 
     public native String getCurrentPeerName();

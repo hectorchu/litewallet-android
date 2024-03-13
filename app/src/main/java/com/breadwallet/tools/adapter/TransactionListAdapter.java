@@ -226,18 +226,27 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         if (confirms < item.lockedFor) {
             availableForSpend = false;
         }
+
+        ConstraintSet set = new ConstraintSet();
+        int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                16, mContext.getResources().getDisplayMetrics());
+
         if (availableForSpend && received) {
             convertView.status_2.setText(mContext.getString(R.string.Transaction_available));
-        } else {
-            convertView.constraintLayout.removeView(convertView.status_2);
-            ConstraintSet set = new ConstraintSet();
+            convertView.status_2.setVisibility(View.VISIBLE);
             set.clone(convertView.constraintLayout);
-            int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, mContext.getResources().getDisplayMetrics());
-
-            set.connect(R.id.status, ConstraintSet.BOTTOM, convertView.constraintLayout.getId(), ConstraintSet.BOTTOM, px);
-            // Apply the changes
-            set.applyTo(convertView.constraintLayout);
+            set.connect(R.id.status_2, ConstraintSet.BOTTOM,
+                    convertView.constraintLayout.getId(), ConstraintSet.BOTTOM, px);
+        } else {
+            convertView.status_2.setVisibility(View.GONE);
+            set.clone(convertView.constraintLayout);
+            set.connect(R.id.status, ConstraintSet.BOTTOM,
+                    convertView.constraintLayout.getId(), ConstraintSet.BOTTOM, px);
         }
+
+        // Apply the changes
+        set.applyTo(convertView.constraintLayout);
+
         if (level == 6) {
             convertView.status.setText(mContext.getString(R.string.Transaction_complete));
         } else {

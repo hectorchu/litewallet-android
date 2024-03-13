@@ -380,8 +380,8 @@ public class BRWalletManager {
     /**
      * Wallet callbacks
      */
-    public static void publishCallback(final String message, final int error, byte[] txHash) {
-        Timber.d("timber: publishCallback: " + message + ", err:" + error + ", txHash: " + Arrays.toString(txHash));
+    public static void publishCallback(final String message, final int error, String txHash) {
+        Timber.d("timber: publishCallback: " + message + ", err:" + error + ", txHash: " + txHash);
         final Context app = BreadApp.getBreadContext();
         BRExecutor.getInstance().forMainThreadTasks().execute(new Runnable() {
             @Override

@@ -423,7 +423,10 @@ class FragmentSend : Fragment() {
                 allFilled = false
                 SpringAnimator.failShakeAnimation(activity, amountEdit)
             }
-            if (satoshiAmount.toLong() > BRWalletManager.getInstance().getBalance(activity)) {
+            val fee = BRWalletManager.getInstance()
+                .feeForTransaction(address, satoshiAmount.toLong())
+            if (fee == 0L) {
+                allFilled = false
                 SpringAnimator.failShakeAnimation(activity, balanceText)
                 SpringAnimator.failShakeAnimation(activity, feeText)
             }
@@ -587,7 +590,7 @@ class FragmentSend : Fragment() {
         setAmount()
         val iso = selectedIso
         val currencySymbol = BRCurrency.getSymbolByIso(activity, selectedIso)
-        curBalance = BRWalletManager.getInstance().getBalance(activity)
+        curBalance = BRWalletManager.getInstance().maxOutputAmount
         if (!amountLabelOn) isoText.text = currencySymbol
         isoButton.text = String.format(
             "%s(%s)",
@@ -633,14 +636,10 @@ class FragmentSend : Fragment() {
         //formattedBalance
         val aproxFee = BRCurrency.getFormattedCurrencyString(activity, iso, feeForISO)
         Timber.d("timber: updateText: aproxFee: %s", aproxFee)
-        if (BigDecimal(
-                if (tmpAmount.isEmpty() || tmpAmount.equals(
-                        ".",
-                        ignoreCase = true
-                    )
-                ) "0" else tmpAmount
-            ).toDouble() > balanceForISO.toDouble()
-        ) {
+        val amount = BigDecimal(if (tmpAmount.isEmpty() ||
+            tmpAmount.equals(".", ignoreCase = true)) "0" else tmpAmount)
+        if (amount.toDouble() > balanceForISO.toDouble() ||
+            addressEdit.text.toString() != "" && amount.signum() != 0 && fee == 0L) {
             balanceText.setTextColor(requireContext().getColor(R.color.warning_color))
             feeText.setTextColor(requireContext().getColor(R.color.warning_color))
             amountEdit.setTextColor(requireContext().getColor(R.color.warning_color))

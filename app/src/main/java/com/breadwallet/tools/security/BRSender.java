@@ -369,7 +369,7 @@ public class BRSender {
     }
 
     private boolean isLargerThanBalance(Context app, PaymentItem paymentRequest) {
-        return paymentRequest.amount > 0 && paymentRequest.amount > BRWalletManager.getInstance().getBalance(app);
+        return paymentRequest.amount > 0 && paymentRequest.amount > BRWalletManager.getInstance().getMaxOutputAmount();
     }
 
     private boolean notEnoughForFee(PaymentItem paymentRequest) {

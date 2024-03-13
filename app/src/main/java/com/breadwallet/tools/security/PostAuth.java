@@ -197,7 +197,9 @@ public class PostAuth {
         try {
             BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
                     (scope, continuation) -> BreadApp.lnd.publishTransaction(txn, continuation));
-        } catch (InterruptedException e) {
+            BRWalletManager.publishCallback("", 0, txn.getTxHash());
+        } catch (Exception e) {
+            BRWalletManager.publishCallback(e.getMessage(), 1, txn.getTxHash());
         }
         if (txn != null) return;
 
