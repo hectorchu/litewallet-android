@@ -116,7 +116,7 @@ public class FragmentTransactionItem extends Fragment {
 
         String startingBalance = BRCurrency.getFormattedCurrencyString(getActivity(), iso, BRExchange.getAmountFromSatoshis(getActivity(), iso, new BigDecimal(sent ? item.getBalanceAfterTx() + txAmount.longValue() : item.getBalanceAfterTx() - txAmount.longValue())));
         String endingBalance = BRCurrency.getFormattedCurrencyString(getActivity(), iso, BRExchange.getAmountFromSatoshis(getActivity(), iso, new BigDecimal(item.getBalanceAfterTx())));
-        String commentString = item.metaData == null || item.metaData.comment == null ? "" : item.metaData.comment;
+        String commentString = item.comment;
         String sb = String.format(getString(R.string.Transaction_starting), startingBalance);
         String eb = String.format(getString(R.string.Transaction_ending), endingBalance);
         String amountString = String.format("%s %s\n\n%s\n%s", amount, item.getFee() == -1 ? "" : String.format(getString(R.string.Transaction_fee), fee), sb, eb);
@@ -193,7 +193,7 @@ public class FragmentTransactionItem extends Fragment {
 
     private int getLevel(TxItem item) {
         int blockHeight = item.getBlockHeight();
-        int confirms = blockHeight == Integer.MAX_VALUE ? 0 : BRSharedPrefs.getLastBlockHeight(getContext()) - blockHeight + 1;
+        int confirms = blockHeight == 0 ? 0 : BRSharedPrefs.getLastBlockHeight(getContext()) - blockHeight + 1;
         int level;
         if (confirms <= 0) {
             int relayCount = BRPeerManager.getRelayCount(item.getTxHash());

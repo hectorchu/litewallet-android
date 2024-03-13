@@ -653,17 +653,37 @@ public class BRWalletManager {
 
     public native boolean addressIsUsed(String address);
 
-    public native int feeForTransaction(String addressHolder, long amountHolder);
+    public long feeForTransaction(String address, long amount) {
+        try {
+            return BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                    (scope, continuation) -> BreadApp.lnd.estimateFeeForAmount(
+                            address, amount, continuation));
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 
     public native int feeForTransactionAmount(long amountHolder);
 
-    public native long getMinOutputAmount();
+    public long getMinOutputAmount() {
+        return 1000;
+    }
 
-    public native long getMaxOutputAmount();
+    public long getMaxOutputAmount() {
+        try {
+            return BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                    (scope, continuation) -> BreadApp.lnd.getBalance(
+                            true, continuation));
+        } catch (InterruptedException e) {
+            return 0;
+        }
+    }
 
     public native boolean isCreated();
 
-    public native byte[] tryTransaction(String addressHolder, long amountHolder);
+    public byte[] tryTransaction(String addressHolder, long amountHolder) {
+        return new byte[0];
+    }
 
     // returns the given amount (amount is in satoshis) in local currency units (i.e. pennies, pence)
     // price is local currency units per bitcoin
@@ -715,7 +735,9 @@ public class BRWalletManager {
 
     public native int getTxCount();
 
-    public native long getMinOutputAmountRequested();
+    public long getMinOutputAmountRequested() {
+        return 1000;
+    }
 
     public static native byte[] getAuthPrivKeyForAPI(byte[] seed);
 

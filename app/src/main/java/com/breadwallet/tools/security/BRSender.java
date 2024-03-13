@@ -374,7 +374,7 @@ public class BRSender {
         BRWalletManager m = BRWalletManager.getInstance();
         long feeForTx = m.feeForTransaction(paymentRequest.addresses[0], paymentRequest.amount);
         if (feeForTx == 0) {
-            feeForTx = m.feeForTransaction(paymentRequest.addresses[0], m.getMaxOutputAmount());
+            //feeForTx = m.feeForTransaction(paymentRequest.addresses[0], m.getMaxOutputAmount());
             return feeForTx != 0;
         }
         return false;

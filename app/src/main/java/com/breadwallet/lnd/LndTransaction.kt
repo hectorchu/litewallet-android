@@ -1,5 +1,6 @@
 package com.breadwallet.lnd
 
+import com.breadwallet.tools.util.Utils
 import lnrpc.LightningOuterClass
 import lnrpc.LightningOuterClass.OutputScriptType
 import kotlin.time.Duration.Companion.ZERO
@@ -38,7 +39,7 @@ class LndTransaction() {
         this.blockHeight = transaction.blockHeight
         this.confirms = transaction.numConfirmations
         this.timestamp = transaction.timeStamp
-        this.raw = transaction.rawTxHexBytes.toByteArray()
+        this.raw = Utils.hexToBytes(transaction.rawTxHex)
         this.label = transaction.label
     }
 }

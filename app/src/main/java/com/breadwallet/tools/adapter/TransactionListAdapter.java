@@ -82,7 +82,6 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 TxItem item;
                 for (int i = 0; i < newItems.size(); i++) {
                     item = newItems.get(i);
-                    item.metaData = KVStoreManager.getInstance().getTxMetaData(mContext, item.getTxHash());
                     item.txReversed = Utils.reverseHex(Utils.bytesToHex(item.getTxHash()));
                 }
                 backUpFeed = newItems;
@@ -147,8 +146,7 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private void setTexts(final TxHolder convertView, int position) {
         TxItem item = itemFeed.get(TxManager.getInstance().currentPrompt == null ? position : position - 1);
-        item.metaData = KVStoreManager.getInstance().getTxMetaData(mContext, item.getTxHash());
-        String commentString = (item.metaData == null || item.metaData.comment == null) ? "" : item.metaData.comment;
+        String commentString = item.comment;
         convertView.comment.setText(commentString);
         if (commentString.isEmpty()) {
             convertView.constraintLayout.removeView(convertView.comment);
@@ -178,7 +176,7 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         final String addr = item.getTo()[0];
         convertView.account.setText(addr);
         int blockHeight = item.getBlockHeight();
-        int confirms = blockHeight == Integer.MAX_VALUE ? 0 : BRSharedPrefs.getLastBlockHeight(mContext) - blockHeight + 1;
+        int confirms = blockHeight == 0 ? 0 : BRSharedPrefs.getLastBlockHeight(mContext) - blockHeight + 1;
 
         int level = 0;
         if (confirms <= 0) {
@@ -315,7 +313,7 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             item = backUpFeed.get(i);
             boolean matchesHash = item.getTxHashHexReversed() != null && item.getTxHashHexReversed().contains(lowerQuery);
             boolean matchesAddress = item.getFrom()[0].contains(lowerQuery) || item.getTo()[0].contains(lowerQuery);
-            boolean matchesMemo = item.metaData != null && item.metaData.comment != null && item.metaData.comment.toLowerCase().contains(lowerQuery);
+            boolean matchesMemo = item.comment.toLowerCase().contains(lowerQuery);
             if (matchesHash || matchesAddress || matchesMemo) {
                 if (switchesON == 0) {
                     filteredList.add(item);
@@ -330,7 +328,7 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         willAdd = false;
                     }
 
-                    int confirms = item.getBlockHeight() == Integer.MAX_VALUE ? 0 : BRSharedPrefs.getLastBlockHeight(mContext) - item.getBlockHeight() + 1;
+                    int confirms = item.getBlockHeight() == 0 ? 0 : BRSharedPrefs.getLastBlockHeight(mContext) - item.getBlockHeight() + 1;
                     //complete
                     if (switches[2] && confirms >= 6) {
                         willAdd = false;

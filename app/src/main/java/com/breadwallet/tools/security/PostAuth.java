@@ -12,6 +12,7 @@ import android.security.keystore.UserNotAuthenticatedException;
 import com.breadwallet.BreadApp;
 import com.breadwallet.BuildConfig;
 import com.breadwallet.R;
+import com.breadwallet.lnd.LndTransaction;
 import com.breadwallet.presenter.activities.PaperKeyActivity;
 import com.breadwallet.presenter.activities.PaperKeyProveActivity;
 import com.breadwallet.presenter.activities.SetPinActivity;
@@ -35,11 +36,14 @@ import com.platform.tools.KVStoreManager;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 import kotlinx.coroutines.CoroutineScopeKt;
 import kotlinx.coroutines.CoroutineStart;
 import kotlinx.coroutines.future.FutureKt;
+
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -184,6 +188,18 @@ public class PostAuth {
 
     public void onPublishTxAuth(final Context app, boolean authAsked) {
         if (ActivityUTILS.isMainThread()) throw new NetworkOnMainThreadException();
+
+        LndTransaction txn = new LndTransaction();
+        txn.setOutputs(Collections.singletonList(new LndTransaction.Output(
+                paymentItem.addresses[0], paymentItem.amount, false)));
+        txn.setLabel(paymentItem.comment);
+
+        try {
+            BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                    (scope, continuation) -> BreadApp.lnd.publishTransaction(txn, continuation));
+        } catch (InterruptedException e) {
+        }
+        if (txn != null) return;
 
         final BRWalletManager walletManager = BRWalletManager.getInstance();
         byte[] rawSeed;

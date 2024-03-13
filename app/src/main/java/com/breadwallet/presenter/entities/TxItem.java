@@ -3,7 +3,6 @@ package com.breadwallet.presenter.entities;
 
 import com.breadwallet.lnd.LndTransaction;
 import com.breadwallet.tools.util.Utils;
-import com.platform.entities.TxMetaData;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +22,7 @@ public class TxItem {
     private long outAmounts[];
     private boolean isValid;
     private int txSize;
-    public TxMetaData metaData;
+    public String comment;
 
     private TxItem() {
     }
@@ -64,6 +63,8 @@ public class TxItem {
                 .mapToLong(Long::longValue).toArray();
         this.isValid = true;
         this.txSize = txn.getRaw().length;
+        this.comment = txn.getLabel();
+        if (this.comment.equals("external")) this.comment = "";
     }
 
     public int getBlockHeight() {
