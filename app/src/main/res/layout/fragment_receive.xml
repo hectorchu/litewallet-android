@@ -225,24 +225,35 @@
                     android:textColor="@color/white" />
             </com.breadwallet.presenter.customviews.BRLinearLayoutWithCaret>
 
-            <com.breadwallet.presenter.customviews.BRButton
-                style="@style/BRButtonStyle"
-                android:id="@+id/share_button"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="72dp"
-                android:layout_marginStart="72dp"
-                android:drawableStart="@drawable/ic_share_vertical_gray"
-                android:paddingBottom="12dp"
-                android:paddingLeft="48dp"
-                android:paddingRight="48dp"
-                android:paddingTop="12dp"
-                android:text="@string/Receive.share"
-                android:textColor="@color/light_gray"
-                android:textSize="18sp"
-                app:buttonType="2"
-                app:isBreadButton="true" />
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/mweb_switch"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp" />
+
+                <com.breadwallet.presenter.customviews.BRButton
+                    style="@style/BRButtonStyle"
+                    android:id="@+id/share_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="72dp"
+                    android:drawableStart="@drawable/ic_share_vertical_gray"
+                    android:paddingBottom="12dp"
+                    android:paddingLeft="48dp"
+                    android:paddingRight="48dp"
+                    android:paddingTop="12dp"
+                    android:text="@string/Receive.share"
+                    android:textColor="@color/light_gray"
+                    android:textSize="18sp"
+                    app:buttonType="2"
+                    app:isBreadButton="true" />
+            </LinearLayout>
 
             <com.breadwallet.presenter.customviews.BRLinearLayoutWithCaret xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/share_buttons_layout"

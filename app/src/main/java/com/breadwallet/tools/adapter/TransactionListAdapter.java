@@ -235,8 +235,7 @@ public class TransactionListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             convertView.status_2.setText(mContext.getString(R.string.Transaction_available));
             convertView.status_2.setVisibility(View.VISIBLE);
             set.clone(convertView.constraintLayout);
-            set.connect(R.id.status_2, ConstraintSet.BOTTOM,
-                    convertView.constraintLayout.getId(), ConstraintSet.BOTTOM, px);
+            set.clear(R.id.status, ConstraintSet.BOTTOM);
         } else {
             convertView.status_2.setVisibility(View.GONE);
             set.clone(convertView.constraintLayout);

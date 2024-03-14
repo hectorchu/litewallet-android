@@ -4,7 +4,6 @@ import static com.breadwallet.tools.animation.BRAnimator.animateBackgroundDim;
 import static com.breadwallet.tools.animation.BRAnimator.animateSignalSlide;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.fragment.app.Fragment;
 
 import com.breadwallet.BreadApp;
 import com.breadwallet.R;
@@ -35,6 +36,9 @@ import com.breadwallet.tools.threads.BRExecutor;
 import com.breadwallet.tools.util.BRConstants;
 import com.breadwallet.tools.util.Utils;
 import com.breadwallet.wallet.BRWalletManager;
+
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 
 public class FragmentReceive extends Fragment {
     private static final String TAG = FragmentReceive.class.getName();
@@ -58,6 +62,7 @@ public class FragmentReceive extends Fragment {
     private Handler copyCloseHandler = new Handler();
     private BRKeyboard keyboard;
     private View separator2;
+    private SwitchCompat mweb_switch;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -83,6 +88,7 @@ public class FragmentReceive extends Fragment {
         close = (ImageButton) rootView.findViewById(R.id.close_button);
         separator2 = rootView.findViewById(R.id.separator2);
         separator2.setVisibility(View.GONE);
+        mweb_switch = rootView.findViewById(R.id.mweb_switch);
 
         setListeners();
         BRWalletManager.getInstance().addBalanceChangedListener(balance -> updateQr());
@@ -91,8 +97,8 @@ public class FragmentReceive extends Fragment {
         //TODO: all views are using the layout of this button. Views should be refactored without it
         // Hiding until layouts are built.
 
-        signalLayout.removeView(shareButtonsLayout);
-        signalLayout.removeView(copiedLayout);
+        shareButtonsLayout.setVisibility(View.GONE);
+        copiedLayout.setVisibility(View.GONE);
         signalLayout.setLayoutTransition(BRAnimator.getDefaultTransition());
         signalLayout.setOnTouchListener(new SlideDetector(signalLayout, this::animateClose));
         AnalyticsManager.logCustomEvent(BRConstants._20202116_VRC);
@@ -134,15 +140,19 @@ public class FragmentReceive extends Fragment {
             if (!BRAnimator.isClickAllowed()) return;
             copyText();
         });
+        mweb_switch.setOnClickListener(v -> {
+            if (!BRAnimator.isClickAllowed()) return;
+            setAddress();
+        });
         close.setOnClickListener(v -> animateClose());
     }
 
     private void showShareButtons(boolean b) {
         if (!b) {
-            signalLayout.removeView(shareButtonsLayout);
+            shareButtonsLayout.setVisibility(View.GONE);
             shareButton.setType(2);
         } else {
-            signalLayout.addView(shareButtonsLayout, isReceive ? signalLayout.getChildCount() - 2 : signalLayout.getChildCount());
+            shareButtonsLayout.setVisibility(View.VISIBLE);
             shareButton.setType(3);
             showCopiedLayout(false);
         }
@@ -150,23 +160,18 @@ public class FragmentReceive extends Fragment {
 
     private void showCopiedLayout(boolean b) {
         if (!b) {
-            signalLayout.removeView(copiedLayout);
+            copiedLayout.setVisibility(View.GONE);
             copyCloseHandler.removeCallbacksAndMessages(null);
         } else {
-            if (signalLayout.indexOfChild(copiedLayout) == -1) {
-                signalLayout.addView(copiedLayout, signalLayout.indexOfChild(shareButton));
-                showShareButtons(false);
-                shareButtonsShown = false;
-                copyCloseHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        signalLayout.removeView(copiedLayout);
-                    }
-                }, 2000);
-            } else {
-                copyCloseHandler.removeCallbacksAndMessages(null);
-                signalLayout.removeView(copiedLayout);
-            }
+            copiedLayout.setVisibility(View.VISIBLE);
+            showShareButtons(false);
+            shareButtonsShown = false;
+            copyCloseHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    copiedLayout.setVisibility(View.GONE);
+                }
+            }, 2000);
         }
     }
 
@@ -223,15 +228,31 @@ public class FragmentReceive extends Fragment {
                 BRExecutor.getInstance().forMainThreadTasks().execute(new Runnable() {
                     @Override
                     public void run() {
-                        receiveAddress = BRSharedPrefs.getReceiveAddress(ctx);
-                        mAddress.setText(receiveAddress);
-                        boolean generated = QRUtils.generateQR(ctx, "litecoin:" + receiveAddress, mQrImage);
-                        if (!generated)
-                            throw new RuntimeException("failed to generate qr image for address");
+                        setAddress();
                     }
                 });
             }
         });
+    }
+
+    private void setAddress() {
+        Context ctx = getContext();
+        if (ctx == null) return;
+        receiveAddress = BRSharedPrefs.getReceiveAddress(ctx);
+
+        if (mweb_switch.isChecked()) {
+            try {
+                receiveAddress = BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                        (scope, continuation) -> BreadApp.lnd.getUnusedAddress(true, continuation));
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+
+        mAddress.setText(receiveAddress);
+        boolean generated = QRUtils.generateQR(ctx, "litecoin:" + receiveAddress, mQrImage);
+        if (!generated)
+            throw new RuntimeException("failed to generate qr image for address");
     }
 
     private void copyText() {

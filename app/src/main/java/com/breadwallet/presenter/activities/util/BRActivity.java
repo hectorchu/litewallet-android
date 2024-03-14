@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
  
-import androidx.annotation.Nullable; 
-import androidx.fragment.app.FragmentActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.breadwallet.BreadApp;
 import com.breadwallet.presenter.activities.DisabledActivity;
@@ -27,7 +27,7 @@ import com.breadwallet.tools.util.LocaleHelper;
 import com.breadwallet.wallet.BRWalletManager;
 import timber.log.Timber;
 
-public class BRActivity extends FragmentActivity {
+public class BRActivity extends AppCompatActivity {
 
     static {
         System.loadLibrary(BRConstants.NATIVE_LIB_NAME);

@@ -419,13 +419,13 @@ class FragmentSend : Fragment() {
                 allFilled = false
                 SpringAnimator.failShakeAnimation(activity, addressEdit)
             }
-            if (amountStr.isEmpty()) {
+            if (satoshiAmount.signum() == 0) {
                 allFilled = false
                 SpringAnimator.failShakeAnimation(activity, amountEdit)
             }
             val fee = BRWalletManager.getInstance()
                 .feeForTransaction(address, satoshiAmount.toLong())
-            if (fee == 0L) {
+            if (allFilled && fee == 0L) {
                 allFilled = false
                 SpringAnimator.failShakeAnimation(activity, balanceText)
                 SpringAnimator.failShakeAnimation(activity, feeText)

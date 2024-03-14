@@ -1,7 +1,6 @@
 package com.breadwallet.presenter.fragments;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -17,7 +16,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
+import com.breadwallet.BreadApp;
 import com.breadwallet.R;
 import com.breadwallet.presenter.customviews.BRButton;
 import com.breadwallet.presenter.customviews.BRKeyboard;
@@ -36,6 +39,8 @@ import com.breadwallet.wallet.BRWalletManager;
 
 import java.math.BigDecimal;
 
+import kotlin.coroutines.EmptyCoroutineContext;
+import kotlinx.coroutines.BuildersKt;
 import timber.log.Timber;
 
 public class FragmentRequestAmount extends Fragment {
@@ -64,6 +69,7 @@ public class FragmentRequestAmount extends Fragment {
     private int keyboardIndex;
     //    private int currListIndex;
     private ImageButton close;
+    private SwitchCompat mweb_switch;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -96,6 +102,7 @@ public class FragmentRequestAmount extends Fragment {
         shareButtonsLayout = (BRLinearLayoutWithCaret) rootView.findViewById(R.id.share_buttons_layout);
         close = (ImageButton) rootView.findViewById(R.id.close_button);
         keyboardIndex = signalLayout.indexOfChild(keyboardLayout);
+        mweb_switch = rootView.findViewById(R.id.mweb_switch);
 
         //TODO: all views are using the layout of this button. Views should be refactored without it
         // Hiding until layouts are built.
@@ -180,6 +187,10 @@ public class FragmentRequestAmount extends Fragment {
             copyText();
             showKeyboard(false);
         });
+        mweb_switch.setOnClickListener(v -> {
+            if (!BRAnimator.isClickAllowed()) return;
+            setAddress();
+        });
 
         backgroundLayout.setOnClickListener(v -> {
             removeCurrencySelector();
@@ -238,19 +249,34 @@ public class FragmentRequestAmount extends Fragment {
                 boolean success = BRWalletManager.refreshAddress(getActivity());
                 if (!success) throw new RuntimeException("failed to retrieve address");
 
-                receiveAddress = BRSharedPrefs.getReceiveAddress(getActivity());
-
                 BRExecutor.getInstance().forMainThreadTasks().execute(new Runnable() {
                     @Override
                     public void run() {
-                        mAddress.setText(receiveAddress);
-                        boolean generated = generateQrImage(receiveAddress, "0", "LTC");
-                        if (!generated)
-                            throw new RuntimeException("failed to generate qr image for address");
+                        setAddress();
                     }
                 });
             }
         });
+    }
+
+    private void setAddress() {
+        Context ctx = getContext();
+        if (ctx == null) return;
+        receiveAddress = BRSharedPrefs.getReceiveAddress(ctx);
+
+        if (mweb_switch.isChecked()) {
+            try {
+                receiveAddress = BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
+                        (scope, continuation) -> BreadApp.lnd.getUnusedAddress(true, continuation));
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+
+        mAddress.setText(receiveAddress);
+        boolean generated = generateQrImage(receiveAddress, "0", "LTC");
+        if (!generated)
+            throw new RuntimeException("failed to generate qr image for address");
     }
 
     private void handleClick(String key) {
@@ -394,9 +420,9 @@ public class FragmentRequestAmount extends Fragment {
     }
 
     private void close() {
-        Activity activity = getActivity();
+        FragmentActivity activity = getActivity();
         if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
-            activity.getFragmentManager().popBackStack();
+            activity.getSupportFragmentManager().popBackStack();
         }
     }
 }

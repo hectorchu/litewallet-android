@@ -208,7 +208,7 @@ public class BRAnimator {
         return itemLayoutTransition;
     }
 
-    public static void showRequestFragment(Activity app, String address) {
+    public static void showRequestFragment(FragmentActivity app, String address) {
         if (app == null) {
             Timber.i("timber: showRequestFragment: app is null");
             return;
@@ -218,7 +218,7 @@ public class BRAnimator {
             return;
         }
 
-        FragmentRequestAmount fragmentRequestAmount = (FragmentRequestAmount) app.getFragmentManager().findFragmentByTag(FragmentRequestAmount.class.getName());
+        FragmentRequestAmount fragmentRequestAmount = (FragmentRequestAmount) app.getSupportFragmentManager().findFragmentByTag(FragmentRequestAmount.class.getName());
         if (fragmentRequestAmount != null && fragmentRequestAmount.isAdded())
             return;
 
@@ -226,7 +226,7 @@ public class BRAnimator {
         Bundle bundle = new Bundle();
         bundle.putString("address", address);
         fragmentRequestAmount.setArguments(bundle);
-        app.getFragmentManager().beginTransaction()
+        app.getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(0, 0, 0, R.animator.plain_300)
                 .add(android.R.id.content, fragmentRequestAmount, FragmentRequestAmount.class.getName())
                 .addToBackStack(FragmentRequestAmount.class.getName()).commit();
@@ -234,12 +234,13 @@ public class BRAnimator {
     }
 
     //isReceive tells the Animator that the Receive fragment is requested, not My Address
-    public static void showReceiveFragment(Activity app, boolean isReceive) {
+    public static void showReceiveFragment(FragmentActivity app, boolean isReceive) {
         if (app == null) {
             Timber.i("timber: showReceiveFragment: app is null");
             return;
         }
-        FragmentReceive fragmentReceive = (FragmentReceive) app.getFragmentManager().findFragmentByTag(FragmentReceive.class.getName());
+        FragmentReceive fragmentReceive = (FragmentReceive) app.getSupportFragmentManager()
+                .findFragmentByTag(FragmentReceive.class.getName());
         if (fragmentReceive != null && fragmentReceive.isAdded())
             return;
         fragmentReceive = new FragmentReceive();
@@ -247,7 +248,7 @@ public class BRAnimator {
         args.putBoolean("receive", isReceive);
         fragmentReceive.setArguments(args);
 
-        app.getFragmentManager().beginTransaction()
+        app.getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(0, 0, 0, R.animator.plain_300)
                 .add(android.R.id.content, fragmentReceive, FragmentReceive.class.getName())
                 .addToBackStack(FragmentReceive.class.getName()).commit();

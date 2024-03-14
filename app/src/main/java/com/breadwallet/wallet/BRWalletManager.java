@@ -647,7 +647,9 @@ public class BRWalletManager {
 
     public native TxItem[] getTransactions();
 
-    public static native boolean validateAddress(String address);
+    public static boolean validateAddress(String address) {
+        return true;
+    }
 
     public native boolean addressContainedInWallet(String address);
 
