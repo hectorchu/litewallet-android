@@ -425,6 +425,7 @@ public class BRWalletManager {
                     String amCur = BRCurrency.getFormattedCurrencyString(ctx, BRSharedPrefs.getIso(ctx), BRExchange.getAmountFromSatoshis(ctx, BRSharedPrefs.getIso(ctx), new BigDecimal(txn.getAmount())));
                     String formatted = String.format("%s (%s)", am, amCur);
                     String strToShow = String.format(ctx.getString(R.string.TransactionDetails_received), formatted);
+                    if (txn.getBlockHeight() == 0) strToShow += " - Unconfirmed";
                     showToastWithMessage(ctx, strToShow);
                 }
             });

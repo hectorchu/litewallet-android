@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 
 import com.breadwallet.BuildConfig;
 import com.breadwallet.presenter.activities.BreadActivity;
@@ -20,10 +19,9 @@ public class BRNotificationManager {
     public static void createNotificationChannel(Context ctx) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(BuildConfig.APPLICATION_ID,
-            "Litewallet", NotificationManager.IMPORTANCE_DEFAULT);
+                    "Litewallet", NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription("Litewallet");
-            NotificationManager notificationManager = ContextCompat.getSystemService(
-                    ctx, NotificationManager.class);
+            NotificationManager notificationManager = ctx.getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
     }
