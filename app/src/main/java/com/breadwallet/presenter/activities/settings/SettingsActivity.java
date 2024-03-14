@@ -142,6 +142,14 @@ public class SettingsActivity extends BRActivity {
         /*Manage Title*/
         items.add(new BRSettingsItem(getString(R.string.Settings_manage), "", null, true));
 
+        /*Notifications*/
+        items.add(new BRSettingsItem(getString(R.string.Settings_notifications), BRSharedPrefs.getShowNotification(this) ?
+                getString(R.string.PushNotifications_on) : getString(R.string.PushNotifications_off), v -> {
+                    Intent intent = new Intent(SettingsActivity.this, NotificationActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
+                }, false));
+
         /*Fingerprint Limits*/
         if (AuthManager.isFingerPrintAvailableAndSetup(this)) {
             items.add(new BRSettingsItem(getString(R.string.Settings_touchIdLimit_android), "", v -> AuthManager.getInstance().authPrompt(SettingsActivity.this, null, getString(R.string.VerifyPin_continueBody), true, false, new BRAuthCompletion() {

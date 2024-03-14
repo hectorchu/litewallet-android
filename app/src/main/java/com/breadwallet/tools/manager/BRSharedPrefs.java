@@ -46,7 +46,6 @@ public class BRSharedPrefs {
         try {
             defIso = Currency.getInstance(Locale.getDefault()).getCurrencyCode();
         } catch (IllegalArgumentException e) {
-            Timber.e(e);
             ///This is always going to be a Litewallet problem
             // Inspired by: https://stackoverflow.com/questions/26376439/locale-getdefault-returns-unsuported-invalid-locale-for-currency-getinstance
             defIso = Currency.getInstance(new Locale("en", "US")).getCurrencyCode();
@@ -356,7 +355,7 @@ public class BRSharedPrefs {
 
     public static boolean getShowNotification(Context context) {
         SharedPreferences settingsToGet = context.getSharedPreferences(BRConstants.PREFS_NAME, Context.MODE_PRIVATE);
-        return settingsToGet.getBoolean("showNotification", false);
+        return settingsToGet.getBoolean("showNotification", true);
     }
 
     public static void putShowNotification(Context context, boolean show) {
