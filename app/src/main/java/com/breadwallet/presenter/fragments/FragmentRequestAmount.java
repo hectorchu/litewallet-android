@@ -112,9 +112,9 @@ public class FragmentRequestAmount extends Fragment {
         mTitle.setText(getString(R.string.Receive_request));
         setListeners();
 
-        signalLayout.removeView(shareButtonsLayout);
-        signalLayout.removeView(copiedLayout);
-        signalLayout.removeView(request);
+        shareButtonsLayout.setVisibility(View.GONE);
+        copiedLayout.setVisibility(View.GONE);
+        request.setVisibility(View.GONE);
 
         showCurrencyList(false);
         selectedIso = BRSharedPrefs.getPreferredLTC(getContext()) ? "LTC" : BRSharedPrefs.getIso(getContext());
@@ -219,10 +219,10 @@ public class FragmentRequestAmount extends Fragment {
 
     private void toggleShareButtonsVisibility() {
         if (shareButtonsShown) {
-            signalLayout.removeView(shareButtonsLayout);
+            shareButtonsLayout.setVisibility(View.GONE);
             shareButtonsShown = false;
         } else {
-            signalLayout.addView(shareButtonsLayout, signalLayout.getChildCount());
+            shareButtonsLayout.setVisibility(View.VISIBLE);
             shareButtonsShown = true;
         }
     }
@@ -336,24 +336,7 @@ public class FragmentRequestAmount extends Fragment {
     }
 
     private void showKeyboard(boolean b) {
-        int curIndex = keyboardIndex;
-
-        if (!b) {
-            signalLayout.removeView(keyboardLayout);
-        } else {
-            if (signalLayout.indexOfChild(keyboardLayout) == -1)
-                signalLayout.addView(keyboardLayout, curIndex);
-            else
-                signalLayout.removeView(keyboardLayout);
-
-        }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                signalLayout.scrollTo(5, 10);
-            }
-        }, 2000);
-
+        keyboardLayout.setVisibility(b ? View.VISIBLE : View.GONE);
     }
 
     private boolean generateQrImage(String address, String strAmount, String iso) {
@@ -374,10 +357,10 @@ public class FragmentRequestAmount extends Fragment {
 
     private void showShareButtons(boolean b) {
         if (!b) {
-            signalLayout.removeView(shareButtonsLayout);
+            shareButtonsLayout.setVisibility(View.GONE);
             shareButton.setType(2);
         } else {
-            signalLayout.addView(shareButtonsLayout, signalLayout.getChildCount() - 1);
+            shareButtonsLayout.setVisibility(View.VISIBLE);
             shareButton.setType(3);
             showCopiedLayout(false);
         }
@@ -386,23 +369,13 @@ public class FragmentRequestAmount extends Fragment {
 
     private void showCopiedLayout(boolean b) {
         if (!b) {
-            signalLayout.removeView(copiedLayout);
+            copiedLayout.setVisibility(View.GONE);
             copyCloseHandler.removeCallbacksAndMessages(null);
         } else {
-            if (signalLayout.indexOfChild(copiedLayout) == -1) {
-                signalLayout.addView(copiedLayout, signalLayout.indexOfChild(shareButton));
-                showShareButtons(false);
-                shareButtonsShown = false;
-                copyCloseHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        signalLayout.removeView(copiedLayout);
-                    }
-                }, 2000);
-            } else {
-                copyCloseHandler.removeCallbacksAndMessages(null);
-                signalLayout.removeView(copiedLayout);
-            }
+            copiedLayout.setVisibility(View.VISIBLE);
+            showShareButtons(false);
+            shareButtonsShown = false;
+            copyCloseHandler.postDelayed(() -> copiedLayout.setVisibility(View.GONE), 2000);
         }
     }
 
