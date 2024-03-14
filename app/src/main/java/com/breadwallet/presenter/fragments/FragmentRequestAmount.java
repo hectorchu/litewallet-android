@@ -41,6 +41,7 @@ import java.math.BigDecimal;
 
 import kotlin.coroutines.EmptyCoroutineContext;
 import kotlinx.coroutines.BuildersKt;
+
 import timber.log.Timber;
 
 public class FragmentRequestAmount extends Fragment {
@@ -274,9 +275,8 @@ public class FragmentRequestAmount extends Fragment {
         }
 
         mAddress.setText(receiveAddress);
-        boolean generated = generateQrImage(receiveAddress, "0", "LTC");
-        if (!generated)
-            throw new RuntimeException("failed to generate qr image for address");
+        boolean generated = generateQrImage(receiveAddress, amountEdit.getText().toString(), selectedIso);
+        if (!generated) throw new RuntimeException("failed to generate qr image for address");
     }
 
     private void handleClick(String key) {
