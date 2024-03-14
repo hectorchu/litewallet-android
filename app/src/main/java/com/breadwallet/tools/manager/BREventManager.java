@@ -37,7 +37,7 @@ public class BREventManager implements BreadApp.OnAppBackgrounded {
 
     private BREventManager() {
         sessionId = UUID.randomUUID().toString();
-        BreadApp.addOnBackgroundedListener(this);
+        //BreadApp.addOnBackgroundedListener(this);
     }
 
     public static BREventManager getInstance() {

@@ -1,5 +1,6 @@
 package com.breadwallet.tools.manager;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -8,17 +9,31 @@ import android.content.Intent;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
+import com.breadwallet.BuildConfig;
 import com.breadwallet.presenter.activities.BreadActivity;
 
 public class BRNotificationManager {
     public static final String TAG = BRNotificationManager.class.getName();
 
+    public static void createNotificationChannel(Context ctx) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(BuildConfig.APPLICATION_ID,
+            "Litewallet", NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Litewallet");
+            NotificationManager notificationManager = ContextCompat.getSystemService(
+                    ctx, NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
     public static void sendNotification(Context ctx, int icon, String title, String message, int mId) {
         if (ctx == null) return;
         androidx.core.app.NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(ctx)
+                new NotificationCompat.Builder(ctx, BuildConfig.APPLICATION_ID)
                         .setSmallIcon(icon)
+                        .setAutoCancel(true)
                         .setContentTitle(title)
                         .setContentText(message);
         // Creates an explicit intent for an Activity in your app

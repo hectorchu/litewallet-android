@@ -452,7 +452,8 @@ public class BRWalletManager {
                         }
 
                         if (!BreadActivity.appVisible && BRSharedPrefs.getShowNotification(finalCtx))
-                            BRNotificationManager.sendNotification(finalCtx, R.drawable.notification_icon, finalCtx.getString(R.string.app_name), message, 1);
+                            BRNotificationManager.sendNotification(finalCtx, R.drawable.litewallet_icon_512,
+                                    finalCtx.getString(R.string.app_name), message, 1);
                     }
                 }
             }, 1000);

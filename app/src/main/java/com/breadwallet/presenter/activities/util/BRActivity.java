@@ -44,9 +44,9 @@ public class BRActivity extends AppCompatActivity {
         super.attachBaseContext(LocaleHelper.Companion.getInstance().setLocale(newBase));
     }
 
-    @Override 
-    protected void onStop() {
-        super.onStop();
+    @Override
+    protected void onPause() {
+        super.onPause();
         BreadApp.activityCounter.decrementAndGet();
         BreadApp.onStop(this);
         BreadApp.backgroundedTime = System.currentTimeMillis();

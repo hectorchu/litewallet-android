@@ -2,6 +2,7 @@ package com.breadwallet;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.fingerprint.FingerprintManager;
@@ -15,6 +16,7 @@ import com.breadwallet.presenter.activities.util.BRActivity;
 import com.breadwallet.presenter.entities.PartnerNames;
 import com.breadwallet.tools.listeners.SyncReceiver;
 import com.breadwallet.tools.manager.AnalyticsManager;
+import com.breadwallet.tools.manager.BRNotificationManager;
 import com.breadwallet.tools.manager.BRSharedPrefs;
 import com.breadwallet.tools.util.BRConstants;
 import com.breadwallet.tools.util.LocaleHelper;
@@ -85,9 +87,9 @@ public class BreadApp extends Application {
         display.getSize(size);
         DISPLAY_HEIGHT_PX = size.y;
         mFingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+        BRNotificationManager.createNotificationChannel(this);
 
-        lnd = new LndManager(getApplicationInfo().dataDir,
-                BRSharedPrefs.getTrustNode(getApplicationContext()));
+        lnd = new LndManager(getApplicationInfo().dataDir, BRSharedPrefs.getTrustNode(this));
         try {
             BuildersKt.runBlocking(EmptyCoroutineContext.INSTANCE,
                     (scope, continuation) -> lnd.start(continuation));
